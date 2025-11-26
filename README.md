@@ -1,5 +1,3 @@
-# Firebase Studio
+# Flash Flow
 
-This is a NextJS starter in Firebase Studio.
-
-To get started, take a look at src/app/page.tsx.
+A straightforward flashcard app designed for efficient learning and memorization.
