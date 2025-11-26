@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { FlashcardProvider } from "@/context/FlashcardContext";
 import { Header } from "@/components/Header";
 import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -25,11 +26,18 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased min-h-screen flex flex-col">
-        <FlashcardProvider>
-          <Header />
-          <main className="flex-grow">{children}</main>
-          <Toaster />
-        </FlashcardProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <FlashcardProvider>
+            <Header />
+            <main className="flex-grow">{children}</main>
+            <Toaster />
+          </FlashcardProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
