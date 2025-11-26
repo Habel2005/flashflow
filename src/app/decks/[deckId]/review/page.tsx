@@ -15,9 +15,9 @@ export default function ReviewPage() {
   const router = useRouter();
   const deckId = Array.isArray(params.deckId) ? params.deckId[0] : params.deckId;
   
-  const { getDeckById, getCardsByDeckId, updateCardStatus } = useFlashcards();
+  const { getDeckById, getCardsByDeckId, updateCardStatus, cards } = useFlashcards();
   const deck = getDeckById(deckId);
-  const allCardsInDeck = getCardsByDeckId(deckId);
+  const allCardsInDeck = useMemo(() => getCardsByDeckId(deckId), [deckId, cards]);
   
   const [reviewCards, setReviewCards] = useState(() => allCardsInDeck.sort(() => Math.random() - 0.5));
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -40,7 +40,7 @@ export default function ReviewPage() {
   }, [deckId, isClient, allCardsInDeck]);
   
   const currentCard = reviewCards[currentIndex];
-  const progress = (currentIndex / reviewCards.length) * 100;
+  const progress = reviewCards.length > 0 ? ((currentIndex) / reviewCards.length) * 100 : 0;
   
   if (!isClient) {
       return null;
@@ -51,6 +51,7 @@ export default function ReviewPage() {
   }
 
   const handleNext = (known: boolean) => {
+    if (!currentCard) return;
     updateCardStatus(currentCard.id, known);
     if (known) {
       setKnownCount(prev => prev + 1);
@@ -88,6 +89,7 @@ export default function ReviewPage() {
   }
 
   if (showResults) {
+    const finalProgress = reviewCards.length > 0 ? ((currentIndex + 1) / reviewCards.length) * 100 : 0;
     return (
       <div className="container mx-auto p-4 md:p-8 flex items-center justify-center min-h-[70vh]">
         <Card className="w-full max-w-md text-center">
@@ -95,6 +97,7 @@ export default function ReviewPage() {
             <CardTitle>Review Complete!</CardTitle>
           </CardHeader>
           <CardContent>
+             <Progress value={finalProgress} className="mb-4"/>
             <p className="text-lg mb-4">You reviewed {reviewCards.length} cards.</p>
             <p className="text-3xl font-bold text-green-600">You knew {knownCount}!</p>
             <p className="text-3xl font-bold text-red-600">You missed {reviewCards.length - knownCount}.</p>
@@ -125,13 +128,15 @@ export default function ReviewPage() {
           <Progress value={progress} />
         </div>
 
-        <div onClick={() => setIsFlipped(!isFlipped)} className="cursor-pointer">
-          <Flashcard
-            front={currentCard.front}
-            back={currentCard.back}
-            isFlipped={isFlipped}
-          />
-        </div>
+        {currentCard && (
+            <div onClick={() => setIsFlipped(!isFlipped)} className="cursor-pointer">
+            <Flashcard
+                front={currentCard.front}
+                back={currentCard.back}
+                isFlipped={isFlipped}
+            />
+            </div>
+        )}
 
         <div className="mt-6 flex justify-center gap-4">
           {isFlipped ? (
