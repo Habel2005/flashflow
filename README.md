@@ -9,3 +9,4 @@ npm install
 npm run build
 npm start
 ```
+run the above commands to run
