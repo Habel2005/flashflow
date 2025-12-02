@@ -17,7 +17,7 @@ export default function ReviewPage() {
   
   const { getDeckById, getCardsByDeckId, updateCardStatus, cards: allCards } = useFlashcards();
   const deck = getDeckById(deckId);
-  const allCardsInDeck = useMemo(() => getCardsByDeckId(deckId), [deckId, getCardsByDeckId]);
+  const allCardsInDeck = useMemo(() => getCardsByDeckId(deckId), [deckId, getCardsByDeckId, allCards]);
   
   const [reviewCards, setReviewCards] = useState<typeof allCardsInDeck>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -35,7 +35,7 @@ export default function ReviewPage() {
     setShowResults(false);
     setKnownCount(0);
     setIsFlipped(false);
-  }, [deckId, allCardsInDeck]);
+  }, [deckId]); // Only re-run when deckId changes.
   
   const currentCard = reviewCards.length > 0 ? reviewCards[currentIndex] : undefined;
   const progress = reviewCards.length > 0 ? ((currentIndex) / reviewCards.length) * 100 : 0;
@@ -73,7 +73,7 @@ export default function ReviewPage() {
     setKnownCount(0);
   };
   
-  if (reviewCards.length === 0) {
+  if (allCardsInDeck.length === 0) {
       return (
         <div className="container mx-auto p-4 md:p-8 text-center">
             <h2 className="text-2xl font-bold mb-4">This deck is empty!</h2>
