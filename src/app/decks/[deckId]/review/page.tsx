@@ -15,9 +15,9 @@ export default function ReviewPage() {
   const router = useRouter();
   const deckId = Array.isArray(params.deckId) ? params.deckId[0] : params.deckId;
   
-  const { getDeckById, getCardsByDeckId, updateCardStatus, cards } = useFlashcards();
+  const { getDeckById, getCardsByDeckId, updateCardStatus, cards: allCards } = useFlashcards();
   const deck = getDeckById(deckId);
-  const allCardsInDeck = useMemo(() => getCardsByDeckId(deckId), [deckId, cards]);
+  const allCardsInDeck = useMemo(() => getCardsByDeckId(deckId), [deckId, getCardsByDeckId, allCards]);
   
   const [reviewCards, setReviewCards] = useState(() => allCardsInDeck.sort(() => Math.random() - 0.5));
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -32,14 +32,16 @@ export default function ReviewPage() {
 
   useEffect(() => {
     if (isClient) {
-      setReviewCards(allCardsInDeck.sort(() => Math.random() - 0.5));
+      const shuffledCards = [...allCardsInDeck].sort(() => Math.random() - 0.5);
+      setReviewCards(shuffledCards);
       setCurrentIndex(0);
       setShowResults(false);
       setKnownCount(0);
+      setIsFlipped(false);
     }
   }, [deckId, isClient, allCardsInDeck]);
   
-  const currentCard = reviewCards[currentIndex];
+  const currentCard = reviewCards.length > 0 ? reviewCards[currentIndex] : undefined;
   const progress = reviewCards.length > 0 ? ((currentIndex) / reviewCards.length) * 100 : 0;
   
   if (!isClient) {
@@ -66,7 +68,8 @@ export default function ReviewPage() {
   };
 
   const restartReview = () => {
-    setReviewCards(allCardsInDeck.sort(() => Math.random() - 0.5));
+    const shuffledCards = [...allCardsInDeck].sort(() => Math.random() - 0.5);
+    setReviewCards(shuffledCards);
     setCurrentIndex(0);
     setIsFlipped(false);
     setShowResults(false);

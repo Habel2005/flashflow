@@ -59,7 +59,7 @@ export default function DecksPage() {
                 </CardHeader>
                 <div className="flex-grow" />
                 <CardFooter>
-                  <div className="flex justify-end w-full items-center text-sm font-semibold text-accent">
+                  <div className="flex justify-end w-full items-center text-sm font-semibold text-primary hover:underline">
                     View Deck <ArrowRight className="ml-2 h-4 w-4" />
                   </div>
                 </CardFooter>
