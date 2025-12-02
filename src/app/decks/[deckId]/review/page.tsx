@@ -17,9 +17,9 @@ export default function ReviewPage() {
   
   const { getDeckById, getCardsByDeckId, updateCardStatus, cards: allCards } = useFlashcards();
   const deck = getDeckById(deckId);
-  const allCardsInDeck = useMemo(() => getCardsByDeckId(deckId), [deckId, getCardsByDeckId, allCards]);
+  const allCardsInDeck = useMemo(() => getCardsByDeckId(deckId), [deckId, allCards]);
   
-  const [reviewCards, setReviewCards] = useState(() => allCardsInDeck.sort(() => Math.random() - 0.5));
+  const [reviewCards, setReviewCards] = useState(() => [...allCardsInDeck].sort(() => Math.random() - 0.5));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [showResults, setShowResults] = useState(false);
@@ -31,6 +31,7 @@ export default function ReviewPage() {
   }, []);
 
   useEffect(() => {
+    // This effect now correctly depends on allCardsInDeck which is memoized.
     if (isClient) {
       const shuffledCards = [...allCardsInDeck].sort(() => Math.random() - 0.5);
       setReviewCards(shuffledCards);
@@ -42,7 +43,7 @@ export default function ReviewPage() {
   }, [deckId, isClient, allCardsInDeck]);
   
   const currentCard = reviewCards.length > 0 ? reviewCards[currentIndex] : undefined;
-  const progress = reviewCards.length > 0 ? ((currentIndex) / reviewCards.length) * 100 : 0;
+  const progress = reviewCards.length > 0 ? ((currentIndex + 1) / reviewCards.length) * 100 : 0;
   
   if (!isClient) {
       return null;
@@ -92,7 +93,6 @@ export default function ReviewPage() {
   }
 
   if (showResults) {
-    const finalProgress = reviewCards.length > 0 ? ((currentIndex + 1) / reviewCards.length) * 100 : 0;
     return (
       <div className="container mx-auto p-4 md:p-8 flex items-center justify-center min-h-[70vh]">
         <Card className="w-full max-w-md text-center">
@@ -100,7 +100,7 @@ export default function ReviewPage() {
             <CardTitle>Review Complete!</CardTitle>
           </CardHeader>
           <CardContent>
-             <Progress value={finalProgress} className="mb-4"/>
+             <Progress value={progress} className="mb-4"/>
             <p className="text-lg mb-4">You reviewed {reviewCards.length} cards.</p>
             <p className="text-3xl font-bold text-green-600">You knew {knownCount}!</p>
             <p className="text-3xl font-bold text-red-600">You missed {reviewCards.length - knownCount}.</p>
@@ -121,7 +121,7 @@ export default function ReviewPage() {
 
   return (
     <div className="container mx-auto p-4 md:p-8">
-      <Link href={`/decks/${deckId}`} className="flex items-center text-sm text-accent mb-4 hover:underline">
+      <Link href={`/decks/${deckId}`} className="flex items-center text-sm text-primary mb-4 hover:underline">
         <ArrowLeft className="mr-2 h-4 w-4" />
         Exit Review
       </Link>
