@@ -17,9 +17,9 @@ export default function ReviewPage() {
   
   const { getDeckById, getCardsByDeckId, updateCardStatus, cards: allCards } = useFlashcards();
   const deck = getDeckById(deckId);
-  const allCardsInDeck = useMemo(() => getCardsByDeckId(deckId), [deckId, allCards]);
+  const allCardsInDeck = useMemo(() => getCardsByDeckId(deckId), [deckId, getCardsByDeckId]);
   
-  const [reviewCards, setReviewCards] = useState(() => [...allCardsInDeck].sort(() => Math.random() - 0.5));
+  const [reviewCards, setReviewCards] = useState<typeof allCardsInDeck>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [showResults, setShowResults] = useState(false);
@@ -28,22 +28,18 @@ export default function ReviewPage() {
 
   useEffect(() => {
     setIsClient(true);
-  }, []);
-
-  useEffect(() => {
-    // This effect now correctly depends on allCardsInDeck which is memoized.
-    if (isClient) {
-      const shuffledCards = [...allCardsInDeck].sort(() => Math.random() - 0.5);
-      setReviewCards(shuffledCards);
-      setCurrentIndex(0);
-      setShowResults(false);
-      setKnownCount(0);
-      setIsFlipped(false);
-    }
-  }, [deckId, isClient, allCardsInDeck]);
+    // Shuffle and set cards only once when the component mounts or deck changes
+    const shuffledCards = [...allCardsInDeck].sort(() => Math.random() - 0.5);
+    setReviewCards(shuffledCards);
+    setCurrentIndex(0);
+    setShowResults(false);
+    setKnownCount(0);
+    setIsFlipped(false);
+  }, [deckId, allCardsInDeck]);
   
   const currentCard = reviewCards.length > 0 ? reviewCards[currentIndex] : undefined;
-  const progress = reviewCards.length > 0 ? ((currentIndex + 1) / reviewCards.length) * 100 : 0;
+  const progress = reviewCards.length > 0 ? ((currentIndex) / reviewCards.length) * 100 : 0;
+  const displayProgress = reviewCards.length > 0 ? ((currentIndex + 1) / reviewCards.length) * 100 : 0;
   
   if (!isClient) {
       return null;
@@ -100,7 +96,7 @@ export default function ReviewPage() {
             <CardTitle>Review Complete!</CardTitle>
           </CardHeader>
           <CardContent>
-             <Progress value={progress} className="mb-4"/>
+             <Progress value={100} className="mb-4"/>
             <p className="text-lg mb-4">You reviewed {reviewCards.length} cards.</p>
             <p className="text-3xl font-bold text-green-600">You knew {knownCount}!</p>
             <p className="text-3xl font-bold text-red-600">You missed {reviewCards.length - knownCount}.</p>
@@ -128,7 +124,7 @@ export default function ReviewPage() {
       <div className="max-w-2xl mx-auto">
         <div className="mb-4">
           <p className="text-center text-muted-foreground mb-2">Card {currentIndex + 1} of {reviewCards.length}</p>
-          <Progress value={progress} />
+          <Progress value={displayProgress} />
         </div>
 
         {currentCard && (
